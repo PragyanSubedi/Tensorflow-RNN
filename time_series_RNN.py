@@ -94,21 +94,45 @@ train = optimizer.minimize(loss)
 
 init =tf.global_variables_initializer()
 
-#SESSION
+#SESSION FOR CREATING MODEL
 
 saver = tf.train.Saver()
+#
+# with tf.Session() as sess:
+#     sess.run(init)
+#
+#     for iteration in range(num_train_iterations):
+#
+#         X_batch,y_batch = ts_data.next_batch(batch_size,num_time_steps,False)
+#
+#         sess.run(train,feed_dict={X:X_batch,y:y_batch})
+#
+#         if iteration%100 ==0:
+#             mse =loss.eval(feed_dict={X:X_batch,y:y_batch})
+#             print(iteration,"\tMSE",mse)
+#
+#     saver.save(sess,"./RNN_model/rnn_time_series_model")
+
 
 with tf.Session() as sess:
-    sess.run(init)
+    saver.restore(sess,"./RNN_model/rnn_time_series_model")
 
-    for iteration in range(num_train_iterations):
+    X_new =np.sin(np.array(train_inst[:-1].reshape(-1,num_time_steps,num_inputs)))
+    y_pred = sess.run(outputs, feed_dict={X:X_new})
 
-        X_batch,y_batch = ts_data.next_batch(batch_size,num_time_steps,False)
+plt.title("TESTING THE MODEL")
 
-        sess.run(train,feed_dict={X:X_batch,y:y_batch})
+# TRAINING INSTANCE
+plt.plot(train_inst[:-1],np.sin(train_inst[:-1]),"bo",markersize=15,alpha=0.5,label="Training Instance")
 
-        if iteration%100 ==0:
-            mse =loss.eval(feed_dict={X:X_batch,y:y_batch})
-            print(iteration,"\tMSE",mse)
+# TARGET TO PREDICT (Correct test values np.sin(train))
+plt.plot(train_inst[1:],np.sin(train_inst[1:]),'ko',markersize=10,label='TARGET')
 
-    saver.save(sess,"./RNN_model/rnn_time_series_model")
+# Models prediction
+plt.plot(train_inst[1:],y_pred[0,:,0],'r.',markersize =10,label="Predictions")
+
+plt.xlabel('TIME')
+
+plt.legend()
+plt.tight_layout()
+plt.show()
