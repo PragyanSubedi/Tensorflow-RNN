@@ -113,26 +113,44 @@ saver = tf.train.Saver()
 #
 #     saver.save(sess,"./RNN_model/rnn_time_series_model")
 
+# MODEL RESTORE
+# with tf.Session() as sess:
+#     saver.restore(sess,"./RNN_model/rnn_time_series_model")
+#
+#     X_new =np.sin(np.array(train_inst[:-1].reshape(-1,num_time_steps,num_inputs)))
+#     y_pred = sess.run(outputs, feed_dict={X:X_new})
+
+# plt.title("TESTING THE MODEL")
+#
+# # TRAINING INSTANCE
+# plt.plot(train_inst[:-1],np.sin(train_inst[:-1]),"bo",markersize=15,alpha=0.5,label="Training Instance")
+#
+# # TARGET TO PREDICT (Correct test values np.sin(train))
+# plt.plot(train_inst[1:],np.sin(train_inst[1:]),'ko',markersize=10,label='TARGET')
+#
+# # Models prediction
+# plt.plot(train_inst[1:],y_pred[0,:,0],'r.',markersize =10,label="Predictions")
+#
+# plt.xlabel('TIME')
+#
+# plt.legend()
+# plt.tight_layout()
+# plt.show()
+
+
+#GENERATING NEW SEQUENCE
 
 with tf.Session() as sess:
     saver.restore(sess,"./RNN_model/rnn_time_series_model")
+    training_instance = list(ts_data.y_true[:30])
+    for iteration in range(len(ts_data.x_data)-num_time_steps):
+        X_batch = np.array(training_instance[-num_time_steps:]).reshape(1,num_time_steps,1)
+        y_pred = sess.run(outputs, feed_dict={X:X_batch})
 
-    X_new =np.sin(np.array(train_inst[:-1].reshape(-1,num_time_steps,num_inputs)))
-    y_pred = sess.run(outputs, feed_dict={X:X_new})
+        training_instance.append(y_pred[0,-1,0])
 
-plt.title("TESTING THE MODEL")
-
-# TRAINING INSTANCE
-plt.plot(train_inst[:-1],np.sin(train_inst[:-1]),"bo",markersize=15,alpha=0.5,label="Training Instance")
-
-# TARGET TO PREDICT (Correct test values np.sin(train))
-plt.plot(train_inst[1:],np.sin(train_inst[1:]),'ko',markersize=10,label='TARGET')
-
-# Models prediction
-plt.plot(train_inst[1:],y_pred[0,:,0],'r.',markersize =10,label="Predictions")
-
+plt.plot(ts_data.x_data,training_instance,'b-')
+plt.plot(ts_data.x_data[:num_time_steps],training_instance[:num_time_steps],'r',linewidth=3)
 plt.xlabel('TIME')
-
-plt.legend()
-plt.tight_layout()
+plt.ylabel('Y')
 plt.show()
