@@ -35,3 +35,28 @@ class TimeSeriesData():
         else:
             return y_batch[:,:-1].reshape(-1,steps,1) , y_batch[:,1:].reshape(-1,steps,1)
 
+ts_data = TimeSeriesData(250,0,10)
+
+# TIME SERIES VISUALIZATION
+
+# ORIGINAL DATA
+# plt.plot(ts_data.x_data,ts_data.y_true)
+# plt.show()
+
+num_time_steps =30
+
+y1,y2,ts = ts_data.next_batch(1,num_time_steps,True)
+# plt.plot(ts.flatten()[1:],y2.flatten(),'*', label = "Single Training Instance")
+# plt.legend()
+# plt.tight_layout()
+# plt.show()
+
+# Training Data
+
+train_inst = np.linspace(5, 5 + ts_data.resolution*(num_time_steps+1), num_time_steps+1)
+plt.title('A training instance')
+plt.plot(train_inst[:-1],ts_data.ret_true(train_inst[:-1]),'bo',markersize=15,alpha=0.5,label="INSTANCE")
+plt.plot(train_inst[1:],ts_data.ret_true(train_inst[1:]),'ko',markersize=7,label='TARGET')
+
+plt.show()
+
