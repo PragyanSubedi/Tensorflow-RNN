@@ -15,7 +15,7 @@ class TimeSeriesData():
     def ret_true(self,x_series):
         return np.sin(x_series)
 
-    def next_batch(self,batch_size,steps,return_batch_ts):
+    def next_batch(self,batch_size,steps,return_batch_ts=False):
 
         # Grab a random starting point for each batch
         rand_start = np.random.rand(batch_size,1)
@@ -54,9 +54,61 @@ y1,y2,ts = ts_data.next_batch(1,num_time_steps,True)
 # Training Data
 
 train_inst = np.linspace(5, 5 + ts_data.resolution*(num_time_steps+1), num_time_steps+1)
-plt.title('A training instance')
-plt.plot(train_inst[:-1],ts_data.ret_true(train_inst[:-1]),'bo',markersize=15,alpha=0.5,label="INSTANCE")
-plt.plot(train_inst[1:],ts_data.ret_true(train_inst[1:]),'ko',markersize=7,label='TARGET')
+# plt.title('A training instance')
+# plt.plot(train_inst[:-1],ts_data.ret_true(train_inst[:-1]),'bo',markersize=15,alpha=0.5,label="INSTANCE")
+# plt.plot(train_inst[1:],ts_data.ret_true(train_inst[1:]),'ko',markersize=7,label='TARGET')
+#
+# plt.show()
 
-plt.show()
+num_inputs =1
 
+num_neurons = 100
+
+num_outputs = 1
+
+learning_rate = 0.001
+
+num_train_iterations = 2000
+
+batch_size = 1
+
+#PLACEHOLDERS
+
+X = tf.placeholder(tf.float32,[None,num_time_steps,num_inputs])
+y = tf.placeholder(tf.float32,[None,num_time_steps,num_outputs])
+
+# RNN CELL LAYER
+
+cell = tf.contrib.rnn.BasicRNNCell(num_units=num_neurons,activation=tf.nn.relu)
+#TO GET 1 output
+cell = tf.contrib.rnn.OutputProjectionWrapper(cell,output_size=num_outputs)
+# WHILE Loop operation to run over the cells
+outputs,states = tf.nn.dynamic_rnn(cell, X, dtype=tf.float32)
+
+#MEAN SQUARE ERROR AS COST FUNCTION
+loss = tf.reduce_mean(tf.square(outputs-y))
+
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+
+train = optimizer.minimize(loss)
+
+init =tf.global_variables_initializer()
+
+#SESSION
+
+saver = tf.train.Saver()
+
+with tf.Session() as sess:
+    sess.run(init)
+
+    for iteration in range(num_train_iterations):
+
+        X_batch,y_batch = ts_data.next_batch(batch_size,num_time_steps,False)
+
+        sess.run(train,feed_dict={X:X_batch,y:y_batch})
+
+        if iteration%100 ==0:
+            mse =loss.eval(feed_dict={X:X_batch,y:y_batch})
+            print(iteration,"\tMSE",mse)
+
+    saver.save(sess,"./RNN_model/rnn_time_series_model")
