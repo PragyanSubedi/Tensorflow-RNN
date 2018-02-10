@@ -1,5 +1,5 @@
 # Tensorflow-RNN
-Houses RNN projects dones using TensorFlow.
+Houses RNN projects done using TensorFlow.
 
 ## Manual RNN
 
