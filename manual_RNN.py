@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 # 3 neuron RNN layer
-# x -> 3 neurons -> y -> 3 neurons -> y and so on.
+# x0 -> 3 neurons -> y0 and x1 -> 3 neurons -> y1 
 
 # CONSTANTS
 
