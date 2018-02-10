@@ -12,4 +12,5 @@ Houses RNN projects dones using TensorFlow.
  Each Recurrent Neuron as 2 sets of weights
    
    Wx for input weight on X
+   
    Wy for weights on output of original X
